@@ -1,0 +1,43 @@
+:root {
+  --purple-color: rgb(60, 60, 138);
+  --blue-color: blue;
+}
+* {
+  padding: 0;
+  margin: 0;
+  color: white;
+  box-sizing: border-box;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+  width: 100vw;
+  height: 100vh;
+}
+
+.game {
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  height: 750px;
+  width: 750px;
+  background-color: var(--purple-color);
+  gap: 5px;
+  padding: 5px;
+}
+
+.box {
+  background-color: var(--blue-color);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.box svg {
+  fill: aliceblue;
+  width: 200px;
+  height: 200px;
+}
