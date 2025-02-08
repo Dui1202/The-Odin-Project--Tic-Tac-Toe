@@ -1,14 +1,6 @@
-const readline = require("readline");
-const box1 = document.getElementById("1");
-const box2 = document.getElementById("2");
-const box3 = document.getElementById("3");
-const box4 = document.getElementById("4");
-const box5 = document.getElementById("5");
-const box6 = document.getElementById("6");
-const box7 = document.getElementById("7");
-const box8 = document.getElementById("8");
-const box9 = document.getElementById("9");
 const boxes = document.querySelectorAll(".box");
+const playerTurnText = document.querySelector(".player-turn");
+const restartButton = document.querySelector("#restart");
 
 //Create the X svg
 const svgNS = "http://www.w3.org/2000/svg";
@@ -31,11 +23,6 @@ const oSymbol = document.createElementNS(svgNS, "svg");
 oSymbol.setAttribute("viewBox", svgOViewBox);
 oSymbol.appendChild(oPath);
 
-// Create readline interface
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
 function GameBoard() {
   const rows = 3;
   const cols = 3;
@@ -83,19 +70,12 @@ function GameBoard() {
 function GameManager() {
   const board = GameBoard();
   const players = [
-    {
-      id: 1,
-      name: "Player 1",
-      playerSymbol: "O ",
-    },
-    {
-      id: 2,
-      name: "Player 2",
-      playerSymbol: "X ",
-    },
+    { id: 1, name: "Player 1", playerSymbol: "O " },
+    { id: 2, name: "Player 2", playerSymbol: "X " },
   ];
-  let currentPlayerTurn = players[0];
+  let currentPlayerIndex = 0;
   let isTie = false;
+
   const hasWinner = () => {
     for (let i = 0; i < 3; i++) {
       if (
@@ -131,57 +111,104 @@ function GameManager() {
     }
     return false;
   };
+
   const switchTurn = () => {
-    if (currentPlayerTurn.id === 1) {
-      currentPlayerTurn = players[1];
-    } else {
-      currentPlayerTurn = players[0];
-    }
-  };
-  const playTurn = () => {
-    console.log(`${currentPlayerTurn.name} 's turn!`);
-    rl.question("Enter row: ", (row) => {
-      rl.question("Enter col: ", (col) => {
-        if (board.isValid(board.board[row][col])) {
-          board.drawXO(currentPlayerTurn, row, col);
-          board.printBoard();
-          if (hasWinner()) {
-            console.log(`${currentPlayerTurn.name} wins!`);
-            rl.close();
-            return;
-          } else if (isTie) {
-            console.log("Tie!");
-            rl.close();
-            return;
-          }
-          switchTurn();
-          playTurn();
-        } else {
-          console.log("Invalid move!");
-          playTurn();
-        }
-      });
-    });
+    currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
   };
 
-  return { playTurn, currentPlayerTurn, switchTurn, board };
+  const getCurrentPlayer = () => players[currentPlayerIndex];
+  const getTie = () => isTie;
+
+  const playTurn = (row, col) => {
+    if (board.isValid(board.board[row][col])) {
+      const playerBeforeSwitch = getCurrentPlayer(); // Get current player
+
+      board.drawXO(playerBeforeSwitch, row, col);
+      board.printBoard();
+
+      if (hasWinner()) {
+        console.log(`${playerBeforeSwitch.name} wins!`);
+        return playerBeforeSwitch;
+      }
+
+      if (board.isFull() && !hasWinner()) {
+        console.log("Tie!");
+        isTie = true;
+        return playerBeforeSwitch;
+      }
+
+      switchTurn();
+      return playerBeforeSwitch; // Return the player who actually made the move
+    } else {
+      console.log("Invalid move!");
+      return null; // Move wasn't valid, return nothing
+    }
+  };
+
+  return {
+    playTurn,
+    getCurrentPlayer, // Expose this function instead of currentPlayerTurn
+    switchTurn,
+    board,
+    hasWinner,
+    isTie,
+    getTie,
+  };
 }
 
 function GameGraphic() {
-  const updateScreen = () => {};
-  const clickHandlerBoard = (currentPlayerTurn) => {
+  const gameManager = GameManager();
+  const updateScreen = (playerMoved) => {
+    if (gameManager.hasWinner()) {
+      playerTurnText.textContent = `${playerMoved.name} wins!`;
+    } else if (gameManager.getTie()) {
+      playerTurnText.textContent = "Tie!";
+    } else {
+      playerTurnText.textContent = `${
+        gameManager.getCurrentPlayer().name
+      }'s turn`;
+    }
+    if (gameManager.hasWinner()) {
+      boxes.forEach((box) => {
+        box.removeEventListener("click", handleClick);
+      });
+    }
+  };
+  const handleClick = (event) => {
+    const clickedBox = event.currentTarget;
+    const row = parseInt(clickedBox.dataset.row);
+    const col = parseInt(clickedBox.dataset.col);
+
+    const playerWhoMoved = gameManager.playTurn(row, col);
+
+    if (playerWhoMoved) {
+      if (playerWhoMoved.playerSymbol === "X ") {
+        clickedBox.appendChild(xSymbol.cloneNode(true));
+      } else {
+        clickedBox.appendChild(oSymbol.cloneNode(true));
+      }
+    }
+
+    updateScreen(playerWhoMoved); // Pass the last moved player
+  };
+  const clickHandlerBoard = () => {
     boxes.forEach((box) => {
+      box.addEventListener("click", handleClick);
       box.addEventListener("click", () => {
-        if (currentPlayerTurn.playerSymbol == "X ") {
-          box.appendChild(xSymbol);
-        } else {
-          box.appendChild(oSymbol);
-        }
+        if (clickedBox.hasChildNodes()) return;
       });
     });
+
+    restartButton.addEventListener("click", RestartGame);
   };
+
+  clickHandlerBoard();
 }
 function StartGame() {
-  const gameManager = GameManager();
-  const gameGraphic = GameGraphic();
+  GameGraphic();
 }
+function RestartGame() {
+  location.reload();
+}
+
+StartGame();

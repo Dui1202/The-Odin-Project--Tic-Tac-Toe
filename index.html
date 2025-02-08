@@ -10,15 +10,19 @@
     <div class="container">
       <h1>Tic Tac Toe</h1>
       <div class="game">
-        <div class="box row1 col1" id="1"></div>
-        <div class="box row1 col2" id="2"></div>
-        <div class="box row1 col3" id="3"></div>
-        <div class="box row2 col1" id="4"></div>
-        <div class="box row2 col2" id="5"></div>
-        <div class="box row2 col3" id="6"></div>
-        <div class="box row3 col1" id="7"></div>
-        <div class="box row3 col2" id="8"></div>
-        <div class="box row3 col3" id="9"></div>
+        <div class="box" data-row="0" data-col="0" id="1"></div>
+        <div class="box" data-row="0" data-col="1" id="2"></div>
+        <div class="box" data-row="0" data-col="2" id="3"></div>
+        <div class="box" data-row="1" data-col="0" id="4"></div>
+        <div class="box" data-row="1" data-col="1" id="5"></div>
+        <div class="box" data-row="1" data-col="2" id="6"></div>
+        <div class="box" data-row="2" data-col="0" id="7"></div>
+        <div class="box" data-row="2" data-col="1" id="8"></div>
+        <div class="box" data-row="2" data-col="2" id="9"></div>
+      </div>
+      <div class="player-turn"></div>
+      <div class="buttons">
+        <button id="restart">Restart</button>
       </div>
     </div>
   </body>

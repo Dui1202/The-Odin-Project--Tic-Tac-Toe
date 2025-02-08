@@ -41,3 +41,11 @@
   width: 200px;
   height: 200px;
 }
+#restart {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: var(--blue-color);
+  border: none;
+  cursor: pointer;
+}
